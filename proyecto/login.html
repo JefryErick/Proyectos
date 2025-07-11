@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Dashboard Propagación</title>
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+            --primary-blue-dark: #1d4ed8;
+            --dark-bg: #1e293b;
+            --darker-bg: #353942;
+            --light-gray: #f8fafc;
+            --white: #ffffff;
+            --danger: #dc2626;
+            --success: #059669;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border-gray: #e2e8f0;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+        }
+
+        .login-container {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            padding: 48px;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue) 0%, #0ea5e9 100%);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--border-gray);
+            background: var(--white);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.15s ease-in-out;
+            text-align: center;
+        }
+
+        .mode-btn.active {
+            border-color: var(--primary-blue);
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .mode-btn:hover {
+            border-color: var(--primary-blue);
+        }
+
+        .admin-btn {
+            background: #dc2626;
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 24px;
+            width: 100%;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .admin-btn:hover {
+            background: #b91c1c;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group input {
+            padding: 16px;
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.15s ease-in-out;
+            background: var(--white);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group input:hover {
+            border-color: var(--primary-blue);
+        }
+
+        .login-btn {
+            background: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            padding: 16px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.15s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 16px;
+        }
+
+        .login-btn:hover {
+            background: var(--primary-blue-dark);
+            transform: translateY(-1px);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid transparent;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            border-color: #a7f3d0;
+            color: #065f46;
+        }
+
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            border: 2px solid var(--border-gray);
+            border-top: 2px solid var(--primary-blue);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary-blue);
+        }
+
+        .demo-credentials {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .demo-credentials h4 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .demo-credentials p {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin: 4px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 32px 24px;
+                margin: 16px;
+            }
+
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🌐 Dashboard</h1>
+            <p>Acceso al Sistema de Análisis</p>
+        </div>
+
+        <div id="alert-container"></div>
+
+        <button class="admin-btn" id="adminBtn">🔐 Acceso Administrador</button>
+
+        <div class="mode-selector" id="modeSelector">
+            <button class="mode-btn active" data-mode="login">Iniciar Sesión</button>
+            <button class="mode-btn" data-mode="register">Registrarse</button>
+        </div>
+
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="username">Usuario</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <div class="form-group hidden" id="confirmPasswordGroup">
+                <label for="confirmPassword">Confirmar Contraseña</label>
+                <input type="password" id="confirmPassword" name="confirmPassword">
+            </div>
+
+            <div class="form-group hidden" id="emailGroup">
+                <label for="email">Email (Opcional)</label>
+                <input type="email" id="email" name="email">
+            </div>
+
+            <div class="remember-me" id="rememberGroup">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Recordar sesión</label>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                Iniciar Sesión
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <span id="loadingText">Verificando credenciales...</span>
+            </div>
+        </form>
+
+        <div class="demo-credentials" id="demoCredentials">
+            <h4>🔧 Credenciales de Demo:</h4>
+            <p><strong>Usuario:</strong> admin</p>
+            <p><strong>Contraseña:</strong> admin123</p>
+            <p><strong>Usuario:</strong> analyst</p>
+            <p><strong>Contraseña:</strong> analyst123</p>
+        </div>
+    </div>
+
+    <script>
+        class UserManager {
+            constructor() {
+                this.users = this.loadUsers();
+                this.currentMode = 'login';
+                this.isAdminMode = false;
+                this.initElements();
+                this.init();
+            }
+
+            initElements() {
+                this.form = document.getElementById('loginForm');
+                this.alertContainer = document.getElementById('alert-container');
+                this.loading = document.getElementById('loading');
+                this.loginBtn = document.getElementById('loginBtn');
+                this.loadingText = document.getElementById('loadingText');
+                this.modeSelector = document.getElementById('modeSelector');
+                this.adminBtn = document.getElementById('adminBtn');
+                this.confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
+                this.emailGroup = document.getElementById('emailGroup');
+                this.rememberGroup = document.getElementById('rememberGroup');
+                this.demoCredentials = document.getElementById('demoCredentials');
+            }
+
+            init() {
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                this.modeSelector.addEventListener('click', (e) => this.handleModeChange(e));
+                this.adminBtn.addEventListener('click', () => this.toggleAdminMode());
+                this.checkExistingSession();
+            }
+
+            loadUsers() {
+                const users = JSON.parse(localStorage.getItem('app_users') || '[]');
+                if (users.length === 0) {
+                    const defaultUsers = [
+                        { username: 'admin', password: 'admin123', email: 'admin@demo.com', role: 'admin' },
+                        { username: 'analyst', password: 'analyst123', email: 'analyst@demo.com', role: 'user' }
+                    ];
+                    localStorage.setItem('app_users', JSON.stringify(defaultUsers));
+                    return defaultUsers;
+                }
+                return users;
+            }
+
+            saveUsers(users) {
+                localStorage.setItem('app_users', JSON.stringify(users));
+                this.users = users;
+            }
+
+            checkExistingSession() {
+                const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+                if (token) {
+                    this.showAlert('Sesión activa encontrada, redirigiendo...', 'success');
+                    setTimeout(() => window.location.href = '/', 1500);
+                }
+            }
+
+            handleModeChange(e) {
+                if (e.target.classList.contains('mode-btn')) {
+                    this.currentMode = e.target.dataset.mode;
+                    this.updateModeUI();
+                }
+            }
+
+            updateModeUI() {
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.mode === this.currentMode);
+                });
+
+                const isRegister = this.currentMode === 'register';
+                this.confirmPasswordGroup.classList.toggle('hidden', !isRegister);
+                this.emailGroup.classList.toggle('hidden', !isRegister);
+                this.rememberGroup.classList.toggle('hidden', isRegister);
+                this.demoCredentials.classList.toggle('hidden', isRegister);
+                
+                this.loginBtn.textContent = isRegister ? 'Registrarse' : 'Iniciar Sesión';
+                document.getElementById('confirmPassword').required = isRegister;
+            }
+
+            toggleAdminMode() {
+                this.isAdminMode = !this.isAdminMode;
+                this.adminBtn.textContent = this.isAdminMode ? '👤 Modo Usuario' : '🔐 Acceso Administrador';
+                this.adminBtn.style.background = this.isAdminMode ? '#059669' : '#dc2626';
+                this.modeSelector.classList.toggle('hidden', this.isAdminMode);
+                this.demoCredentials.classList.toggle('hidden', this.isAdminMode);
+                
+                if (this.isAdminMode) {
+                    this.currentMode = 'login';
+                    this.updateModeUI();
+                    this.showAlert('Modo administrador activado', 'success');
+                }
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this.form);
+                const username = formData.get('username');
+                const password = formData.get('password');
+                const confirmPassword = formData.get('confirmPassword');
+                const email = formData.get('email');
+                const remember = formData.get('remember');
+
+                if (!username || !password) {
+                    this.showAlert('Por favor, complete todos los campos', 'danger');
+                    return;
+                }
+
+                if (this.currentMode === 'register') {
+                    this.handleRegister(username, password, confirmPassword, email);
+                } else {
+                    this.handleLogin(username, password, remember);
+                }
+            }
+
+            handleRegister(username, password, confirmPassword, email) {
+                if (password !== confirmPassword) {
+                    this.showAlert('Las contraseñas no coinciden', 'danger');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    this.showAlert('La contraseña debe tener al menos 6 caracteres', 'danger');
+                    return;
+                }
+
+                if (this.users.find(user => user.username === username)) {
+                    this.showAlert('El usuario ya existe', 'danger');
+                    return;
+                }
+
+                this.setLoading(true, 'Registrando usuario...');
+                this.clearAlerts();
+
+                setTimeout(() => {
+                    const newUser = {
+                        username,
+                        password,
+                        email: email || '',
+                        role: 'user',
+                        createdAt: new Date().toISOString()
+                    };
+
+                    this.users.push(newUser);
+                    this.saveUsers(this.users);
+
+                    this.showAlert('¡Usuario registrado exitosamente! Ahora puedes iniciar sesión.', 'success');
+                    this.currentMode = 'login';
+                    this.updateModeUI();
+                    this.form.reset();
+                    this.setLoading(false);
+                }, 1000);
+            }
+
+            async handleLogin(username, password, remember) {
+                this.setLoading(true, 'Verificando credenciales...');
+                this.clearAlerts();
+
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            username, 
+                            password, 
+                            remember: remember === 'on',
+                            isAdmin: this.isAdminMode 
+                        })
+                    });
+
+                    const result = await response.json();
+                    this.handleLoginResponse(result, remember);
+                } catch (error) {
+                    console.error('Error en login:', error);
+                    this.showAlert('Error de conexión. Intente nuevamente.', 'danger');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            handleLoginResponse(result, remember) {
+                if (result.success) {
+                    if (remember) {
+                        localStorage.setItem('auth_token', result.token);
+                    } else {
+                        sessionStorage.setItem('auth_token', result.token);
+                    }
+
+                    this.showAlert('¡Login exitoso! Redirigiendo...', 'success');
+                    
+                    // Verificar el rol del usuario
+                    fetch('/api/profile', {
+                        headers: {
+                            'Authorization': 'Bearer ' + result.token
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const redirectPath = data.user.role === 'admin' && this.isAdminMode ? 
+                                        '/admin-dashboard' : '/';
+                        setTimeout(() => window.location.href = redirectPath, 1500);
+                    })
+                    .catch(error => {
+                        console.error('Error verificando rol:', error);
+                        setTimeout(() => window.location.href = '/', 1500);
+                    });
+                } else {
+                    this.showAlert(result.message || 'Error en las credenciales', 'danger');
+                }
+            }
+
+            showAlert(message, type) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type}`;
+                alertDiv.innerHTML = message;
+                
+                this.alertContainer.appendChild(alertDiv);
+                
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.parentNode.removeChild(alertDiv);
+                    }
+                }, 5000);
+            }
+
+            clearAlerts() {
+                this.alertContainer.innerHTML = '';
+            }
+
+            setLoading(isLoading, text = 'Verificando credenciales...') {
+                if (isLoading) {
+                    this.loading.classList.add('active');
+                    this.loginBtn.disabled = true;
+                    this.loadingText.textContent = text;
+                } else {
+                    this.loading.classList.remove('active');
+                    this.loginBtn.disabled = false;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            new UserManager();
+        });
+    </script>
+</body>
+</html>

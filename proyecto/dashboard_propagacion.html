@@ -6,6 +6,7 @@
     <title>Dashboard - Análisis de Propagación de Información</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/2.1.0/chartjs-plugin-annotation.min.js"></script>
     <style>
             :root {
                 /* Paleta de colores profesional para estadísticas */
@@ -342,6 +343,35 @@
             .canvas-container {
                 position: relative;
                 height: 320px;
+            }
+
+            /* Interpretación de gráficos */
+            .chart-interpretation {
+                margin-top: 20px;
+                padding: 16px;
+                background-color: #f8fafc;
+                border-radius: 8px;
+                border-left: 4px solid var(--primary-blue);
+                font-size: 0.9rem;
+                color: var(--text-secondary);
+            }
+
+            .chart-interpretation-title {
+                font-weight: 600;
+                color: var(--text-primary);
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .chart-interpretation-title svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .chart-interpretation-content {
+                line-height: 1.6;
             }
 
             /* Panel de validación */
@@ -742,6 +772,28 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Interpretación de resultados de validación -->
+            <div class="chart-interpretation">
+                <div class="chart-interpretation-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                    Interpretación de Resultados
+                </div>
+                <div class="chart-interpretation-content">
+                    <p>Los resultados de validación cruzada temporal muestran el rendimiento de los modelos de propagación:</p>
+                    <ul>
+                        <li><strong>MAE (Error Absoluto Medio):</strong> Mide el error promedio absoluto entre predicciones y valores reales. Valores más bajos indican mejor precisión.</li>
+                        <li><strong>RMSE (Error Cuadrático Medio):</strong> Similar al MAE pero penaliza más los errores grandes. Útil para identificar modelos con predicciones muy alejadas.</li>
+                        <li><strong>R² (Coeficiente de Determinación):</strong> Indica qué porcentaje de la variabilidad en los datos es explicado por el modelo. Valores cercanos a 1 son ideales.</li>
+                        <li><strong>Score de Robustez:</strong> Mide qué tan bien se desempeña el modelo ante variaciones en los datos. Valores altos indican mayor estabilidad.</li>
+                    </ul>
+                    <p>Comparando ambos modelos, podemos determinar cuál se ajusta mejor a los patrones de propagación en su dataset.</p>
+                </div>
+            </div>
         </div>
 
         <!-- Charts Grid -->
@@ -751,12 +803,54 @@
                 <div class="canvas-container">
                     <canvas id="bootstrap-chart"></canvas>
                 </div>
+                <!-- Interpretación del gráfico de bootstrap -->
+                <div class="chart-interpretation">
+                    <div class="chart-interpretation-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+                        </svg>
+                        Interpretación del Gráfico
+                    </div>
+                    <div class="chart-interpretation-content">
+                        <p>Este histograma muestra la distribución de velocidades de propagación obtenidas mediante muestreo bootstrap:</p>
+                        <ul>
+                            <li><strong>Distribución normal:</strong> Si la forma es campana de Gauss, sugiere que la velocidad de propagación sigue un patrón predecible.</li>
+                            <li><strong>Sesgo positivo:</strong> Una cola larga a la derecha indica presencia de algunas cascadas con velocidad excepcionalmente alta.</li>
+                            <li><strong>Sesgo negativo:</strong> Una cola larga a la izquierda sugiere que muchas cascadas tienen baja velocidad de propagación.</li>
+                            <li><strong>Rango de valores:</strong> La amplitud del eje X muestra la variabilidad en las velocidades de propagación.</li>
+                        </ul>
+                        <p>Una distribución estrecha indica consistencia en las velocidades, mientras que una amplia sugiere alta variabilidad.</p>
+                    </div>
+                </div>
             </div>
 
             <div class="chart-container">
                 <h3 class="chart-title">🎯 Distribución de Alcances</h3>
                 <div class="canvas-container">
                     <canvas id="reach-distribution"></canvas>
+                </div>
+                <!-- Interpretación del gráfico de alcances -->
+                <div class="chart-interpretation">
+                    <div class="chart-interpretation-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+                        </svg>
+                        Interpretación del Gráfico
+                    </div>
+                    <div class="chart-interpretation-content">
+                        <p>Este gráfico de dispersión muestra la relación entre velocidad de propagación y alcance total:</p>
+                        <ul>
+                            <li><strong>Relación positiva:</strong> Si los puntos siguen una tendencia ascendente, indica que mayor velocidad generalmente conduce a mayor alcance.</li>
+                            <li><strong>Relación negativa:</strong> Una tendencia descendente es inusual y sugiere que contenido muy viral puede saturar rápidamente a la audiencia.</li>
+                            <li><strong>Agrupamientos:</strong> Grupos de puntos pueden indicar diferentes tipos de cascadas (ej. contenido normal vs. viral).</li>
+                            <li><strong>Outliers:</strong> Puntos alejados de la tendencia representan casos excepcionales que merecen estudio adicional.</li>
+                        </ul>
+                        <p>La línea de tendencia ayuda a cuantificar la relación entre estas dos variables clave.</p>
+                    </div>
                 </div>
             </div>
 
@@ -765,12 +859,55 @@
                 <div class="canvas-container">
                     <canvas id="virality-metrics"></canvas>
                 </div>
+                <!-- Interpretación del gráfico de viralidad -->
+                <div class="chart-interpretation">
+                    <div class="chart-interpretation-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+                        </svg>
+                        Interpretación del Gráfico
+                    </div>
+                    <div class="chart-interpretation-content">
+                        <p>Este gráfico radar muestra el perfil de viralidad promedio del contenido analizado:</p>
+                        <ul>
+                            <li><strong>Factor Viral:</strong> Capacidad del contenido para propagarse exponencialmente. Valores altos indican alto potencial viral.</li>
+                            <li><strong>Velocidad:</strong> Rapidez con que se propaga el contenido. Alta velocidad sugiere impacto inmediato.</li>
+                            <li><strong>Profundidad:</strong> Número promedio de saltos en la cadena de propagación. Profundidad alta indica propagación a través de múltiples generaciones.</li>
+                            <li><strong>Persistencia:</strong> Tiempo que el contenido permanece activo en la red. Alta persistencia sugiere contenido duradero.</li>
+                            <li><strong>Alcance Medio:</strong> Número promedio de nodos alcanzados. Alto alcance indica amplia difusión.</li>
+                        </ul>
+                        <p>Un perfil equilibrado sugiere contenido con buen balance entre velocidad y alcance, mientras que perfiles asimétricos pueden indicar patrones específicos de propagación.</p>
+                    </div>
+                </div>
             </div>
 
             <div class="chart-container">
                 <h3 class="chart-title">🔄 Comparación de Modelos (CV)</h3>
                 <div class="canvas-container">
                     <canvas id="models-comparison"></canvas>
+                </div>
+                <!-- Interpretación del gráfico de comparación de modelos -->
+                <div class="chart-interpretation">
+                    <div class="chart-interpretation-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+                        </svg>
+                        Interpretación del Gráfico
+                    </div>
+                    <div class="chart-interpretation-content">
+                        <p>Este gráfico compara el rendimiento de los modelos de propagación mediante múltiples métricas:</p>
+                        <ul>
+                            <li><strong>MAE y RMSE:</strong> Para estas métricas, valores más bajos indican mejor rendimiento. Compare qué modelo tiene menores errores.</li>
+                            <li><strong>R²:</strong> Valores más altos son mejores (máximo 1). Indica qué modelo explica mejor la varianza en los datos.</li>
+                            <li><strong>Robustez:</strong> Valores altos indican que el modelo mantiene buen rendimiento con variaciones en los datos.</li>
+                        </ul>
+                        <p>El modelo IC generalmente funciona mejor para propagación simple, mientras que el LT puede ser superior para contenido que requiere umbrales de adopción.</p>
+                        <p>Considere el balance entre precisión (MAE/RMSE) y capacidad explicativa (R²) al elegir el modelo más adecuado para su análisis.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -779,6 +916,29 @@
         <div class="network-viz">
             <h3 class="chart-title">🕸️ Visualización de Red de Propagación</h3>
             <svg id="network-svg"></svg>
+            <!-- Interpretación de la visualización de red -->
+            <div class="chart-interpretation">
+                <div class="chart-interpretation-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                    Interpretación de la Red
+                </div>
+                <div class="chart-interpretation-content">
+                    <p>Esta visualización muestra la estructura de la red y los patrones de propagación:</p>
+                    <ul>
+                        <li><strong>Nodos HUB:</strong> Nodos altamente conectados (coloreados). Actúan como superdifusores que aceleran la propagación.</li>
+                        <li><strong>Nodos Bridge:</strong> Conectan comunidades distintas. Su remoción puede fragmentar la red.</li>
+                        <li><strong>Nodos Leaf:</strong> Nodos periféricos con pocas conexiones. Generalmente son los últimos en recibir información.</li>
+                        <li><strong>Enlaces gruesos:</strong> Indican interacciones fuertes o frecuentes entre nodos.</li>
+                        <li><strong>Enlaces punteados:</strong> Representan conexiones débiles o poco frecuentes.</li>
+                    </ul>
+                    <p>La distribución espacial muestra comunidades naturales en la red. Los nodos centrales son críticos para la propagación, mientras que los periféricos pueden representar límites en el alcance.</p>
+                    <p>Al interactuar con los nodos, puede identificar actores clave y patrones de conexión que explican los resultados de propagación observados.</p>
+                </div>
+            </div>
         </div>
 
         <!-- Loading Indicator -->
@@ -931,62 +1091,6 @@
                     avg_velocity: data.basic_metrics.avg_velocity,
                     max_reach: data.basic_metrics.max_reach,
                     avg_virality: data.viralidad_metrics.factor_viralizacion?.media || 0
-                }
-            };
-        }
-
-        // Generar cascadas simuladas
-        function generateSimulatedCascades(count) {
-            const cascades = [];
-            for (let i = 0; i < count; i++) {
-                cascades.push({
-                    id: i,
-                    reach: Math.floor(Math.random() * 1000) + 10,
-                    velocity: Math.random() * 0.5,
-                    depth: Math.floor(Math.random() * 8) + 1,
-                    virality: Math.random() * 50 + 5
-                });
-            }
-            return cascades;
-        }
-
-        // Generar resultados de bootstrap
-        function generateBootstrapResults(samples) {
-            const velocities = [];
-            const reaches = [];
-            
-            for (let i = 0; i < samples; i++) {
-                velocities.push(Math.random() * 0.5);
-                reaches.push(Math.floor(Math.random() * 1000) + 10);
-            }
-            
-            return {
-                velocities: velocities,
-                reaches: reaches,
-                confidence_intervals: {
-                    velocity: {
-                        mean: velocities.reduce((a, b) => a + b) / velocities.length,
-                        ci_lower: velocities.sort()[Math.floor(samples * 0.025)],
-                        ci_upper: velocities.sort()[Math.floor(samples * 0.975)]
-                    }
-                }
-            };
-        }
-
-        // Generar resultados de validación cruzada
-        function generateCVResults(folds) {
-            return {
-                IC: {
-                    mae: Math.random() * 100 + 20,
-                    rmse: Math.random() * 150 + 30,
-                    r2: Math.random() * 0.8 + 0.1,
-                    robustez: Math.random() * 0.5 + 0.3
-                },
-                LT: {
-                    mae: Math.random() * 120 + 25,
-                    rmse: Math.random() * 160 + 35,
-                    r2: Math.random() * 0.7 + 0.15,
-                    robustez: Math.random() * 0.4 + 0.4
                 }
             };
         }
@@ -1212,6 +1316,7 @@
         }
 
         // Distribución de alcances mejorada
+        // Distribución de alcances mejorada
         updateReachDistribution(data) {
             const ctx = document.getElementById('reach-distribution');
             if (!ctx) {
@@ -1225,25 +1330,65 @@
                 return;
             }
 
+            // Preparar datos para el gráfico
             const scatterData = cascades.map(cascade => ({
                 x: cascade.velocity || 0,
                 y: cascade.reach || 0,
-                depth: cascade.depth || 0
+                depth: cascade.depth || 0,
+                id: cascade.id || 0
             }));
+
+            // Calcular línea de tendencia (regresión lineal simple)
+            const n = scatterData.length;
+            const sumX = scatterData.reduce((sum, d) => sum + d.x, 0);
+            const sumY = scatterData.reduce((sum, d) => sum + d.y, 0);
+            const sumXY = scatterData.reduce((sum, d) => sum + d.x * d.y, 0);
+            const sumXX = scatterData.reduce((sum, d) => sum + d.x * d.x, 0);
+            
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            
+            const minX = Math.min(...scatterData.map(d => d.x));
+            const maxX = Math.max(...scatterData.map(d => d.x));
+            
+            const trendline = [
+                { x: minX, y: slope * minX + intercept },
+                { x: maxX, y: slope * maxX + intercept }
+            ];
 
             const config = {
                 type: 'scatter',
                 data: {
-                    datasets: [{
-                        label: 'Alcance vs Velocidad',
-                        data: scatterData,
-                        backgroundColor: this.colors.info + '80',
-                        borderColor: this.colors.info,
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        pointBorderWidth: 2,
-                        pointBorderColor: '#fff'
-                    }]
+                    datasets: [
+                        {
+                            label: 'Densidad',
+                            data: scatterData,
+                            backgroundColor: this.colors.primary + '20',
+                            borderColor: this.colors.primary + '80',
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointBorderWidth: 2,
+                            pointBorderColor: '#fff',
+                            showLine: false,
+                            type: 'bubble',
+                            radius: context => {
+                                const value = context.raw.y;
+                                const size = Math.min(Math.max(value / 5, 5), 15);
+                                return size;
+                            }
+                        },
+                        {
+                            label: 'Línea de Tendencia',
+                            data: trendline,
+                            borderColor: this.colors.danger,
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false,
+                            showLine: true,
+                            type: 'line'
+                        }
+                    ]
                 },
                 options: {
                     ...this.defaultOptions,
@@ -1251,17 +1396,45 @@
                         ...this.defaultOptions.plugins,
                         title: {
                             display: true,
-                            text: 'Relación entre Alcance y Velocidad de Propagación'
+                            text: 'Relación entre Alcance y Velocidad de Propagación',
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            }
                         },
                         tooltip: {
                             callbacks: {
                                 label: (context) => {
-                                    const point = context.parsed;
+                                    const point = context.raw;
                                     return [
-                                        `Velocidad: ${point.x.toFixed(3)}`,
-                                        `Alcance: ${point.y}`,
-                                        `Profundidad: ${context.raw.depth || 'N/A'}`
+                                        `Cascada ID: ${point.id || 'N/A'}`,
+                                        `Velocidad: ${point.x.toFixed(4)} nodos/seg`,
+                                        `Alcance: ${point.y} nodos`,
+                                        `Profundidad: ${point.depth || 'N/A'} niveles`
                                     ];
+                                },
+                                afterLabel: (context) => {
+                                    const point = context.raw;
+                                    const expectedY = slope * point.x + intercept;
+                                    const deviation = ((point.y - expectedY) / expectedY * 100).toFixed(1);
+                                    return `Desviación de tendencia: ${deviation}%`;
+                                }
+                            }
+                        },
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    yMin: intercept,
+                                    yMax: intercept,
+                                    borderColor: this.colors.info,
+                                    borderWidth: 2,
+                                    borderDash: [6, 6],
+                                    label: {
+                                        content: 'Intercepto',
+                                        enabled: true,
+                                        position: 'left'
+                                    }
                                 }
                             }
                         }
@@ -1270,24 +1443,61 @@
                         x: {
                             title: {
                                 display: true,
-                                text: 'Velocidad de Propagación'
+                                text: 'Velocidad de Propagación (nodos/segundo)',
+                                font: {
+                                    weight: 'bold'
+                                }
                             },
                             grid: {
                                 color: '#f0f0f0'
-                            }
+                            },
+                            min: 0
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: 'Alcance (número de nodos)'
+                                text: 'Alcance (número de nodos)',
+                                font: {
+                                    weight: 'bold'
+                                }
                             },
                             grid: {
                                 color: '#f0f0f0'
-                            }
+                            },
+                            min: 0
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4
                         }
                     }
                 }
             };
+
+            // Agregar plugin de anotaciones si no está presente
+            if (typeof Chart.Annotation === 'undefined') {
+                console.warn('Chart.js Annotation plugin no está cargado');
+            } else {
+                config.options.plugins.annotation = {
+                    annotations: {
+                        line1: {
+                            type: 'line',
+                            yMin: intercept,
+                            yMax: intercept,
+                            borderColor: this.colors.info,
+                            borderWidth: 2,
+                            borderDash: [6, 6],
+                            label: {
+                                content: `Intercepto: ${intercept.toFixed(2)}`,
+                                enabled: true,
+                                position: 'left',
+                                backgroundColor: 'rgba(255,255,255,0.8)'
+                            }
+                        }
+                    }
+                };
+            }
 
             this.charts.reach = new Chart(ctx, config);
         }

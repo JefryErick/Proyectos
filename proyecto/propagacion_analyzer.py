@@ -30,67 +30,45 @@ class PropagacionAnalyzer:
         self.metricas_viralidad = {}
         self.datos_originales = None
         
-    def cargar_datos_twitter_cascade(self):
-        """
-        Carga datos del Twitter Cascade Dataset desde 'data/twitter-simulado.csv'.
-        Formato esperado: user_id, follower_id, timestamp (o nombres similares)
-        """
+    def cargar_datos_twitter_cascade(self, archivo_path='data/twitter_retweets_ajustado2.csv'):
+        """Carga datos reales de retweets obtenidos desde la API de Twitter/X"""
         try:
-            archivo_path = 'data/twitter-simulado.csv'
-            print(f"Cargando Twitter Cascade Dataset desde: {archivo_path}")
+            print(f"📊 Cargando dataset real de retweets desde: {archivo_path}")
             
-            # Intentar diferentes formatos de archivo
-            if archivo_path.endswith('.txt'):
-                df = pd.read_csv(archivo_path, sep='\t', header=None, 
-                                names=['user_id', 'follower_id', 'timestamp'])
-            elif archivo_path.endswith('.csv'):
-                df = pd.read_csv(archivo_path)
-            elif archivo_path.endswith('.json'):
-                df = pd.read_json(archivo_path, lines=True)
-            else:
-                df = pd.read_csv(archivo_path, sep=None, engine='python')
+            # Cargar CSV manteniendo el formato original
+            df = pd.read_csv(archivo_path, parse_dates=['timestamp'])
             
-            # Normalizar nombres de columnas
-            column_mapping = {
-                'user': 'user_id',
-                'follower': 'follower_id',
-                'time': 'timestamp',
-                'created_at': 'timestamp',
-                'datetime': 'timestamp'
-            }
+            # Verificar columnas
+            if not {'user_who_retweeted', 'original_user', 'timestamp'}.issubset(df.columns):
+                raise ValueError("Formato incorrecto. Se requieren: user_who_retweeted, original_user, timestamp")
             
-            for old_name, new_name in column_mapping.items():
-                if old_name in df.columns:
-                    df = df.rename(columns={old_name: new_name})
+            # Limpieza básica
+            df = df.dropna()
+            df = df[df['user_who_retweeted'] != df['original_user']]  # Eliminar auto-retweets
             
-            # Verificar columnas requeridas
-            required_cols = ['user_id', 'follower_id', 'timestamp']
-            if not all(col in df.columns for col in required_cols):
-                raise ValueError(f"El archivo debe contener las columnas: {required_cols}")
+            print(f"✅ Datos cargados: {len(df)} retweets válidos")
+            print(f"📅 Rango temporal: {df['timestamp'].min()} a {df['timestamp'].max()}")
             
-            # Convertir timestamp
-            df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
-            
-            # Limpiar datos
-            df = df.dropna(subset=['user_id', 'follower_id', 'timestamp'])
-            df = df[df['user_id'] != df['follower_id']]  # Eliminar auto-enlaces
-            df = df.drop_duplicates(subset=['user_id', 'follower_id'])  # Duplicados
-            
-            print(f"Datos limpiados: {len(df)} interacciones")
-            
-            # Construir grafo temporal
+            # Construir grafo dirigido con pesos temporales
             for _, row in df.iterrows():
-                self.grafo.add_edge(row['user_id'], row['follower_id'])
-                edge_key = (row['user_id'], row['follower_id'])
-                self.timestamps[edge_key] = row['timestamp']
+                edge = (row['original_user'], row['user_who_retweeted'])
+                self.grafo.add_edge(*edge)
+                self.timestamps[edge] = row['timestamp']
+            
+            # Estadísticas del grafo
+            print(f"🕸️ Grafo construido: {self.grafo.number_of_nodes()} nodos, {self.grafo.number_of_edges()} aristas")
+            print(f"🔝 Top nodos origen:")
+            orig_counts = df['original_user'].value_counts().head(5)
+            for user, count in orig_counts.items():
+                print(f"   - {user}: {count} retweets recibidos")
             
             self.datos_originales = df
-            
-            print(f"Grafo construido: {self.grafo.number_of_nodes()} nodos, {self.grafo.number_of_edges()} aristas")
             return df
-        
+            
         except Exception as e:
-            print(f"Error cargando datos: {e}")
+            print(f"❌ Error cargando dataset real: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return None
 
     
@@ -228,7 +206,85 @@ class PropagacionAnalyzer:
         except Exception as e:
             print(f"Error cargando datos Memetracker: {e}")
             return None
-
+#---------------------------------------------------------------------------
+    def cargar_datos_personalizado(self, archivo_path: str, mapeo_columnas: Dict[str, str] = None):
+        """
+        Carga un dataset personalizado con mapeo flexible de columnas
+        
+        Args:
+            archivo_path: Ruta al archivo CSV
+            mapeo_columnas: Diccionario con mapeo de columnas. Ejemplo:
+                {
+                    'user_id': 'usuario_origen',
+                    'follower_id': 'usuario_destino',
+                    'timestamp': 'fecha_interaccion'
+                }
+        """
+        try:
+            print(f"📂 Cargando dataset personalizado desde: {archivo_path}")
+            
+            # Cargar CSV manteniendo el formato original
+            df = pd.read_csv(archivo_path)
+            
+            # Mapeo de columnas por defecto
+            default_columns = {
+                'user_id': 'user_id',
+                'follower_id': 'follower_id',
+                'timestamp': 'timestamp'
+            }
+            
+            # Aplicar mapeo personalizado si se proporciona
+            if mapeo_columnas:
+                for standard_col, custom_col in mapeo_columnas.items():
+                    if custom_col in df.columns:
+                        df[standard_col] = df[custom_col]
+            
+            # Verificar que tenemos las columnas necesarias
+            required_cols = ['user_id', 'follower_id', 'timestamp']
+            if not all(col in df.columns for col in required_cols):
+                print(f"Columnas disponibles: {list(df.columns)}")
+                raise ValueError(f"El archivo debe contener las columnas: {required_cols}")
+            
+            print(f"📊 Datos cargados: {len(df)} filas")
+            
+            # Convertir timestamp (intenta varios formatos)
+            try:
+                df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s', errors='coerce')  # Unix timestamp
+                if df['timestamp'].isnull().all():
+                    df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')  # Formato string
+            except Exception as e:
+                print(f"⚠️ Error convirtiendo timestamps: {e}")
+                raise ValueError("Formato de timestamp no reconocido")
+            
+            # Limpieza básica
+            df = df.dropna(subset=['user_id', 'follower_id', 'timestamp'])
+            df = df[df['user_id'] != df['follower_id']]  # Eliminar auto-enlaces
+            
+            print(f"🧹 Datos limpiados: {len(df)} conexiones válidas")
+            
+            # Construir grafo temporal
+            for _, row in df.iterrows():
+                self.grafo.add_edge(row['user_id'], row['follower_id'])
+                edge_key = (row['user_id'], row['follower_id'])
+                self.timestamps[edge_key] = row['timestamp']
+            
+            self.datos_originales = df
+            
+            print(f"🕸️ Grafo construido: {self.grafo.number_of_nodes()} nodos, {self.grafo.number_of_edges()} aristas")
+            
+            # Verificar rango temporal
+            if len(df) > 0:
+                print(f"📅 Rango temporal: {df['timestamp'].min()} a {df['timestamp'].max()}")
+                print(f"⏳ Duración: {(df['timestamp'].max() - df['timestamp'].min()).days} días")
+            
+            return df
+            
+        except Exception as e:
+            print(f"❌ Error cargando dataset personalizado: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+#---------------------------------------------------------------------------
     # Función de utilidad para verificar y preparar datasets
     def verificar_y_preparar_datasets(self):
         """
