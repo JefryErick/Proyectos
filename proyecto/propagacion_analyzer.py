@@ -72,7 +72,7 @@ class PropagacionAnalyzer:
             return None
 
     
-    def cargar_datos_digg(self, archivo_path: str = "data/digg-simulado.csv"):
+    def cargar_datos_digg(self, archivo_path: str = "data/digg.csv"):
         """
         Carga datos del Digg Dataset simulado
         Formato esperado: user_id, friend_id, timestamp
@@ -122,7 +122,7 @@ class PropagacionAnalyzer:
             print(f"Error cargando datos Digg: {e}")
             return None
 
-    def cargar_datos_memetracker(self, archivo_path: str = "data/memetracker-simulado.csv"):
+    def cargar_datos_memetracker(self, archivo_path: str = "data/memetracker.csv"):
         """
         Carga datos del Memetracker Dataset simulado
         Formato esperado: phrase, site, timestamp, frequency
@@ -208,59 +208,51 @@ class PropagacionAnalyzer:
             return None
 #---------------------------------------------------------------------------
     def cargar_datos_personalizado(self, archivo_path: str, mapeo_columnas: Dict[str, str] = None):
-        """
-        Carga un dataset personalizado con mapeo flexible de columnas
-        
-        Args:
-            archivo_path: Ruta al archivo CSV
-            mapeo_columnas: Diccionario con mapeo de columnas. Ejemplo:
-                {
-                    'user_id': 'usuario_origen',
-                    'follower_id': 'usuario_destino',
-                    'timestamp': 'fecha_interaccion'
-                }
-        """
         try:
             print(f"📂 Cargando dataset personalizado desde: {archivo_path}")
+            print(f"📄 Tamaño del archivo: {os.path.getsize(archivo_path)} bytes")
             
-            # Cargar CSV manteniendo el formato original
-            df = pd.read_csv(archivo_path)
+            # Limpiar grafo y datos anteriores
+            self.grafo.clear()
+            self.timestamps.clear()
+            self.cascadas.clear()
             
-            # Mapeo de columnas por defecto
-            default_columns = {
-                'user_id': 'user_id',
-                'follower_id': 'follower_id',
-                'timestamp': 'timestamp'
-            }
-            
-            # Aplicar mapeo personalizado si se proporciona
-            if mapeo_columnas:
-                for standard_col, custom_col in mapeo_columnas.items():
-                    if custom_col in df.columns:
-                        df[standard_col] = df[custom_col]
-            
-            # Verificar que tenemos las columnas necesarias
-            required_cols = ['user_id', 'follower_id', 'timestamp']
-            if not all(col in df.columns for col in required_cols):
-                print(f"Columnas disponibles: {list(df.columns)}")
-                raise ValueError(f"El archivo debe contener las columnas: {required_cols}")
-            
-            print(f"📊 Datos cargados: {len(df)} filas")
-            
-            # Convertir timestamp (intenta varios formatos)
+            # Cargar CSV con manejo de errores mejorado
             try:
-                df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s', errors='coerce')  # Unix timestamp
-                if df['timestamp'].isnull().all():
-                    df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')  # Formato string
+                df = pd.read_csv(archivo_path)
+                print("✅ Archivo leído correctamente")
+                print(f"📊 Primeras filas:\n{df.head()}")
             except Exception as e:
-                print(f"⚠️ Error convirtiendo timestamps: {e}")
-                raise ValueError("Formato de timestamp no reconocido")
+                print(f"❌ Error al leer el archivo CSV: {str(e)}")
+                raise ValueError(f"No se pudo leer el archivo CSV: {str(e)}")
+            
+            # Verificar columnas requeridas
+            required_columns = {'user_id', 'follower_id', 'timestamp'}
+            missing_columns = required_columns - set(df.columns)
+            if missing_columns:
+                print(f"❌ Columnas faltantes: {missing_columns}")
+                print(f"📋 Columnas disponibles: {list(df.columns)}")
+                raise ValueError(f"Faltan columnas requeridas: {missing_columns}")
+            
+            # Convertir timestamp con manejo de errores
+            try:
+                df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+                if df['timestamp'].isnull().any():
+                    print("⚠️ Algunos timestamps no pudieron convertirse")
+                    print(df[df['timestamp'].isnull()].head())
+                    raise ValueError("Algunos timestamps no son válidos")
+            except Exception as e:
+                print(f"❌ Error convirtiendo timestamps: {e}")
+                raise ValueError(f"Error en formato de timestamp: {str(e)}")
             
             # Limpieza básica
+            initial_count = len(df)
             df = df.dropna(subset=['user_id', 'follower_id', 'timestamp'])
-            df = df[df['user_id'] != df['follower_id']]  # Eliminar auto-enlaces
+            df = df[df['user_id'] != df['follower_id']]
+            print(f"🧹 Datos limpiados: {len(df)} de {initial_count} filas conservadas")
             
-            print(f"🧹 Datos limpiados: {len(df)} conexiones válidas")
+            if len(df) == 0:
+                raise ValueError("No quedaron datos válidos después de la limpieza")
             
             # Construir grafo temporal
             for _, row in df.iterrows():
@@ -272,18 +264,13 @@ class PropagacionAnalyzer:
             
             print(f"🕸️ Grafo construido: {self.grafo.number_of_nodes()} nodos, {self.grafo.number_of_edges()} aristas")
             
-            # Verificar rango temporal
-            if len(df) > 0:
-                print(f"📅 Rango temporal: {df['timestamp'].min()} a {df['timestamp'].max()}")
-                print(f"⏳ Duración: {(df['timestamp'].max() - df['timestamp'].min()).days} días")
-            
             return df
             
         except Exception as e:
-            print(f"❌ Error cargando dataset personalizado: {e}")
+            print(f"❌ Error crítico en cargar_datos_personalizado: {e}")
             import traceback
             traceback.print_exc()
-            return None
+            raise  # Re-lanza la excepción para que se vea en el backend
 #---------------------------------------------------------------------------
     # Función de utilidad para verificar y preparar datasets
     def verificar_y_preparar_datasets(self):

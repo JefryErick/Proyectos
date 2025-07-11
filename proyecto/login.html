@@ -8,6 +8,7 @@
         :root {
             --primary-blue: #2563eb;
             --primary-blue-dark: #1d4ed8;
+            --accent-blue: #0ea5e9;
             --dark-bg: #1e293b;
             --darker-bg: #353942;
             --light-gray: #f8fafc;
@@ -18,6 +19,7 @@
             --text-secondary: #475569;
             --border-gray: #e2e8f0;
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
         * {
@@ -34,17 +36,99 @@
             align-items: center;
             justify-content: center;
             color: var(--text-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Visualizaciones de red de fondo */
+        .network-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .network-left {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 40%;
+            height: 100%;
+            opacity: 0.3;
+        }
+
+        .network-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 40%;
+            height: 100%;
+            opacity: 0.3;
+        }
+
+        .network-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Partículas flotantes */
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        /* Contenedor principal con efecto glassmorphism */
+        .main-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .login-container {
-            background: var(--white);
-            border-radius: 16px;
-            box-shadow: var(--shadow-lg);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
             padding: 48px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .login-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
 
         .login-container::before {
@@ -54,7 +138,18 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, var(--primary-blue) 0%, #0ea5e9 100%);
+            background: linear-gradient(90deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+        }
+
+        .login-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%);
+            pointer-events: none;
         }
 
         .login-header {
@@ -63,15 +158,20 @@
         }
 
         .login-header h1 {
-            font-size: 2rem;
+            font-size: 2.25rem;
             font-weight: 700;
             color: var(--text-primary);
             margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .login-header p {
             color: var(--text-secondary);
-            font-size: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
         }
 
         .mode-selector {
@@ -104,21 +204,40 @@
         }
 
         .admin-btn {
-            background: #dc2626;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
             color: var(--white);
             border: none;
             padding: 12px 24px;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
             margin-bottom: 24px;
             width: 100%;
-            transition: all 0.15s ease-in-out;
+            transition: all 0.3s ease-in-out;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        }
+
+        .admin-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
         }
 
         .admin-btn:hover {
-            background: #b91c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+        }
+
+        .admin-btn:hover::before {
+            left: 100%;
         }
 
         .login-form {
@@ -144,42 +263,64 @@
         .form-group input {
             padding: 16px;
             border: 2px solid var(--border-gray);
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 16px;
-            transition: all 0.15s ease-in-out;
-            background: var(--white);
+            transition: all 0.3s ease-in-out;
+            background: rgba(255, 255, 255, 0.9);
             color: var(--text-primary);
             font-family: inherit;
+            backdrop-filter: blur(10px);
         }
 
         .form-group input:focus {
             outline: none;
             border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-1px);
         }
 
         .form-group input:hover {
             border-color: var(--primary-blue);
+            transform: translateY(-1px);
         }
 
         .login-btn {
-            background: var(--primary-blue);
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
             color: var(--white);
             border: none;
             padding: 16px 24px;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
             font-size: 16px;
-            transition: all 0.15s ease-in-out;
+            transition: all 0.3s ease-in-out;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-top: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
         }
 
         .login-btn:hover {
-            background: var(--primary-blue-dark);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
         }
 
         .login-btn:active {
@@ -190,6 +331,11 @@
             background: #94a3b8;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
+        }
+
+        .login-btn:disabled::before {
+            display: none;
         }
 
         .alert {
@@ -277,20 +423,64 @@
             display: none;
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
+            .network-left,
+            .network-right {
+                display: none;
+            }
+            
+            .main-container {
+                padding: 10px;
+            }
+            
             .login-container {
                 padding: 32px 24px;
                 margin: 16px;
+                max-width: 100%;
+            }
+
+            .login-header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .particle {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 24px 20px;
+                margin: 10px;
             }
 
             .login-header h1 {
                 font-size: 1.5rem;
             }
+            
+            .login-header p {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
+    <!-- Partículas flotantes -->
+    <div class="floating-particles" id="particles"></div>
+    
+    <!-- Visualizaciones de red de fondo -->
+    <div class="network-background">
+        <div class="network-left">
+            <svg class="network-svg" id="networkLeft"></svg>
+        </div>
+        <div class="network-right">
+            <svg class="network-svg" id="networkRight"></svg>
+        </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <div class="login-container">
         <div class="login-header">
             <h1>🌐 Dashboard</h1>
             <p>Acceso al Sistema de Análisis</p>
@@ -348,6 +538,7 @@
             <p><strong>Usuario:</strong> analyst</p>
             <p><strong>Contraseña:</strong> analyst123</p>
         </div>
+    </div>
     </div>
 
     <script>
@@ -591,8 +782,210 @@
             }
         }
 
+        // ========================================
+        // VISUALIZACIONES DE RED Y PARTÍCULAS
+        // ========================================
+
+        class NetworkVisualizer {
+            constructor() {
+                this.initParticles();
+                this.initNetworks();
+            }
+
+            initParticles() {
+                const particlesContainer = document.getElementById('particles');
+                const particleCount = 15;
+
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = Math.random() * 100 + '%';
+                    particle.style.animationDelay = Math.random() * 6 + 's';
+                    particle.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                    particlesContainer.appendChild(particle);
+                }
+            }
+
+            initNetworks() {
+                this.createNetwork('networkLeft', 'left');
+                this.createNetwork('networkRight', 'right');
+            }
+
+            createNetwork(containerId, side) {
+                const container = document.getElementById(containerId);
+                const width = container.clientWidth || 400;
+                const height = container.clientHeight || 600;
+
+                // Crear nodos
+                const nodes = [];
+                const nodeCount = side === 'left' ? 8 : 10;
+                
+                for (let i = 0; i < nodeCount; i++) {
+                    nodes.push({
+                        id: i,
+                        x: Math.random() * width * 0.8 + width * 0.1,
+                        y: Math.random() * height * 0.8 + height * 0.1,
+                        size: Math.random() * 8 + 4,
+                        connections: 0
+                    });
+                }
+
+                // Crear enlaces
+                const links = [];
+                for (let i = 0; i < nodeCount * 1.5; i++) {
+                    const source = Math.floor(Math.random() * nodeCount);
+                    const target = Math.floor(Math.random() * nodeCount);
+                    
+                    if (source !== target) {
+                        links.push({
+                            source: source,
+                            target: target,
+                            weight: Math.random()
+                        });
+                        nodes[source].connections++;
+                        nodes[target].connections++;
+                    }
+                }
+
+                // Crear SVG
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', '100%');
+                svg.setAttribute('height', '100%');
+                svg.style.overflow = 'visible';
+
+                // Crear filtros para efectos
+                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                
+                const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+                filter.setAttribute('id', `glow-${side}`);
+                filter.setAttribute('x', '-50%');
+                filter.setAttribute('y', '-50%');
+                filter.setAttribute('width', '200%');
+                filter.setAttribute('height', '200%');
+                
+                const feGaussianBlur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+                feGaussianBlur.setAttribute('stdDeviation', '3');
+                feGaussianBlur.setAttribute('result', 'coloredBlur');
+                
+                const feMerge = document.createElementNS('http://www.w3.org/2000/svg', 'feMerge');
+                feMerge.innerHTML = `
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                `;
+                
+                filter.appendChild(feGaussianBlur);
+                filter.appendChild(feMerge);
+                defs.appendChild(filter);
+                svg.appendChild(defs);
+
+                // Crear enlaces
+                const linkGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                linkGroup.setAttribute('class', 'links');
+                
+                links.forEach(link => {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    const sourceNode = nodes[link.source];
+                    const targetNode = nodes[link.target];
+                    
+                    line.setAttribute('x1', sourceNode.x);
+                    line.setAttribute('y1', sourceNode.y);
+                    line.setAttribute('x2', targetNode.x);
+                    line.setAttribute('y2', targetNode.y);
+                    line.setAttribute('stroke', side === 'left' ? '#3b82f6' : '#0ea5e9');
+                    line.setAttribute('stroke-width', link.weight * 2 + 1);
+                    line.setAttribute('stroke-opacity', 0.4);
+                    line.setAttribute('stroke-dasharray', link.weight > 0.5 ? 'none' : '3,3');
+                    
+                    linkGroup.appendChild(line);
+                });
+                
+                svg.appendChild(linkGroup);
+
+                // Crear nodos
+                const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                nodeGroup.setAttribute('class', 'nodes');
+                
+                nodes.forEach(node => {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', node.x);
+                    circle.setAttribute('cy', node.y);
+                    circle.setAttribute('r', node.size);
+                    circle.setAttribute('fill', side === 'left' ? '#2563eb' : '#0ea5e9');
+                    circle.setAttribute('stroke', '#ffffff');
+                    circle.setAttribute('stroke-width', 2);
+                    
+                    if (node.connections > 2) {
+                        circle.setAttribute('filter', `url(#glow-${side})`);
+                    }
+                    
+                    // Añadir animación de pulso
+                    circle.style.animation = `pulse 3s ease-in-out infinite`;
+                    circle.style.animationDelay = Math.random() * 3 + 's';
+                    
+                    nodeGroup.appendChild(circle);
+                });
+                
+                svg.appendChild(nodeGroup);
+                container.appendChild(svg);
+
+                // Añadir animación de movimiento suave
+                this.animateNetwork(nodes, links, svg, side);
+            }
+
+            animateNetwork(nodes, links, svg, side) {
+                let time = 0;
+                
+                const animate = () => {
+                    time += 0.02;
+                    
+                    // Mover nodos suavemente
+                    nodes.forEach((node, i) => {
+                        const newX = node.x + Math.sin(time + i) * 2;
+                        const newY = node.y + Math.cos(time + i * 0.5) * 2;
+                        
+                        const circle = svg.querySelector(`circle:nth-child(${i + 1})`);
+                        if (circle) {
+                            circle.setAttribute('cx', newX);
+                            circle.setAttribute('cy', newY);
+                        }
+                    });
+                    
+                    // Actualizar enlaces
+                    const linkElements = svg.querySelectorAll('line');
+                    links.forEach((link, i) => {
+                        const line = linkElements[i];
+                        if (line) {
+                            const sourceNode = nodes[link.source];
+                            const targetNode = nodes[link.target];
+                            
+                            line.setAttribute('x1', sourceNode.x + Math.sin(time + link.source) * 2);
+                            line.setAttribute('y1', sourceNode.y + Math.cos(time + link.source * 0.5) * 2);
+                            line.setAttribute('x2', targetNode.x + Math.sin(time + link.target) * 2);
+                            line.setAttribute('y2', targetNode.y + Math.cos(time + link.target * 0.5) * 2);
+                        }
+                    });
+                    
+                    requestAnimationFrame(animate);
+                };
+                
+                animate();
+            }
+        }
+
+        // Añadir animación de pulso
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0%, 100% { opacity: 0.7; transform: scale(1); }
+                50% { opacity: 1; transform: scale(1.1); }
+            }
+        `;
+        document.head.appendChild(style);
+
         document.addEventListener('DOMContentLoaded', function() {
             new UserManager();
+            new NetworkVisualizer();
         });
     </script>
 </body>

@@ -205,6 +205,230 @@
             background: #b91c1c;
         }
 
+        /* Modal para importar dataset */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: var(--shadow-xl);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+            color: var(--white);
+            padding: 24px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-gray);
+            border-radius: 8px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-blue);
+            background-color: var(--light-gray);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-blue);
+            background-color: #dbeafe;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--medium-gray);
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .upload-hint {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .format-guide {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .format-guide h3 {
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            font-size: 1.125rem;
+        }
+
+        .format-example {
+            background: var(--white);
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', Monaco, 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .format-example table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .format-example th,
+        .format-example td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .format-example th {
+            background-color: var(--light-gray);
+            font-weight: 600;
+        }
+
+        .modal-footer {
+            padding: 24px;
+            border-top: 1px solid var(--border-gray);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-upload {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .btn-upload:hover {
+            background: #047857;
+        }
+
+        .btn-upload:disabled {
+            background: var(--medium-gray);
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .alert-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        /* Botón de cerrar sesión */
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+        }
+
+        .logout-btn:active {
+            transform: translateY(0);
+        }
+
         /* Grid de métricas */
         .metrics-grid {
             display: grid;
@@ -679,6 +903,11 @@
     </style>
 </head>
 <body>
+    <!-- Botón de cerrar sesión -->
+    <button class="logout-btn" onclick="logout()">
+        🚪 Cerrar Sesión
+    </button>
+
     <div class="dashboard-container">
         <!-- Header -->
         <div class="header">
@@ -728,6 +957,12 @@
                     <button class="btn" id="run-analysis-btn">
                         <span class="status-indicator status-inactive"></span>
                         Ejecutar Análisis
+                    </button>
+                </div>
+                
+                <div class="control-group">
+                    <button class="btn btn-secondary" onclick="showUploadModal()">
+                        📁 Importar Dataset
                     </button>
                 </div>
             </div>
@@ -897,6 +1132,124 @@
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <p>Ejecutando análisis de propagación...</p>
+        </div>
+
+        <!-- Modal para importar dataset -->
+        <div id="uploadModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>📁 Importar Dataset Personalizado</h2>
+                    <button class="modal-close" onclick="closeUploadModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <!-- Guía de formato -->
+                    <div class="format-guide">
+                        <h3>📋 Formato Requerido para el Dataset</h3>
+                        <p>Tu archivo CSV debe contener las siguientes columnas obligatorias:</p>
+                        
+                        <div class="format-example">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>user_id</th>
+                                        <th>follower_id</th>
+                                        <th>timestamp</th>
+                                        <th>Descripción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>usuario_origen</td>
+                                        <td>usuario_destino</td>
+                                        <td>2024-01-15 10:30:00</td>
+                                        <td>Quién comparte la información</td>
+                                    </tr>
+                                    <tr>
+                                        <td>usuario_origen</td>
+                                        <td>usuario_destino</td>
+                                        <td>2024-01-15 10:35:00</td>
+                                        <td>Quién recibe la información</td>
+                                    </tr>
+                                    <tr>
+                                        <td>usuario_origen</td>
+                                        <td>usuario_destino</td>
+                                        <td>2024-01-15 10:40:00</td>
+                                        <td>Cuándo ocurre la interacción</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4>📝 Explicación de Columnas:</h4>
+                        <ul>
+                            <li><strong>user_id:</strong> Identificador del usuario que origina la información</li>
+                            <li><strong>follower_id:</strong> Identificador del usuario que recibe la información</li>
+                            <li><strong>timestamp:</strong> Fecha y hora de la interacción (formato: YYYY-MM-DD HH:MM:SS)</li>
+                        </ul>
+                        
+                        <h4>💡 Ejemplos de Datasets Compatibles:</h4>
+                        <ul>
+                            <li><strong>Redes Sociales:</strong> Retweets, shares, menciones</li>
+                            <li><strong>Foros:</strong> Respuestas a posts, citas</li>
+                            <li><strong>Blogs:</strong> Trackbacks, referencias</li>
+                            <li><strong>News:</strong> Citas de artículos, referencias</li>
+                        </ul>
+                        
+                        <h4>⚠️ Requisitos Importantes:</h4>
+                        <ul>
+                            <li>Archivo en formato CSV (separado por comas)</li>
+                            <li>Sin encabezados duplicados</li>
+                            <li>Timestamps en formato consistente</li>
+                            <li>Mínimo 100 interacciones para análisis válido</li>
+                            <li>Tamaño máximo: 50MB</li>
+                        </ul>
+                        
+                        <div style="margin-top: 16px; padding: 12px; background: #f0f9ff; border-radius: 6px; border-left: 4px solid #0ea5e9;">
+                            <strong>📥 Descargar ejemplo:</strong>
+                            <a href="data/ejemplo_dataset.csv" download style="color: #0ea5e9; text-decoration: none; margin-left: 8px;">
+                                ejemplo_dataset.csv
+                            </a>
+                            <br>
+                            <small style="color: #64748b;">Usa este archivo como plantilla para tu dataset</small>
+                        </div>
+                    </div>
+
+                    <!-- Área de upload -->
+                    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">Haz clic para seleccionar archivo o arrastra aquí</div>
+                        <div class="upload-hint">Solo archivos CSV (máximo 50MB)</div>
+                        <input type="file" id="fileInput" class="file-input" accept=".csv" onchange="handleFileSelect(event)">
+                    </div>
+
+                    <!-- Información del archivo seleccionado -->
+                    <div id="fileInfo" style="display: none;">
+                        <div class="alert alert-info">
+                            <strong>Archivo seleccionado:</strong> <span id="fileName"></span>
+                            <br>
+                            <strong>Tamaño:</strong> <span id="fileSize"></span>
+                            <br>
+                            <strong>Columnas detectadas:</strong> <span id="fileColumns"></span>
+                        </div>
+                    </div>
+
+                    <!-- Vista previa de datos -->
+                    <div id="dataPreview" style="display: none;">
+                        <h4>📊 Vista Previa de Datos</h4>
+                        <div class="format-example">
+                            <div id="previewTable"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeUploadModal()">Cancelar</button>
+                    <button class="btn btn-upload" id="uploadBtn" onclick="uploadDataset()" disabled>
+                        📤 Subir Dataset
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1617,6 +1970,250 @@
                 });
             }
         });
+
+        // ========================================
+        // FUNCIONES PARA IMPORTAR DATASET
+        // ========================================
+
+        let selectedFile = null;
+        let fileData = null;
+
+        function showUploadModal() {
+            document.getElementById('uploadModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            resetUploadForm();
+        }
+
+        function resetUploadForm() {
+            selectedFile = null;
+            fileData = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('dataPreview').style.display = 'none';
+            document.getElementById('uploadBtn').disabled = true;
+            document.getElementById('uploadArea').classList.remove('dragover');
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+
+        function processFile(file) {
+            // Validar tipo de archivo
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                alert('Por favor selecciona un archivo CSV válido.');
+                return;
+            }
+
+            // Validar tamaño (50MB máximo)
+            if (file.size > 50 * 1024 * 1024) {
+                alert('El archivo es demasiado grande. Máximo 50MB permitido.');
+                return;
+            }
+
+            selectedFile = file;
+            displayFileInfo(file);
+
+            // Leer y validar el archivo
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csvContent = e.target.result;
+                    const lines = csvContent.split('\n');
+                    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                    
+                    // Validar columnas requeridas
+                    const requiredColumns = ['user_id', 'follower_id', 'timestamp'];
+                    const missingColumns = requiredColumns.filter(col => !headers.includes(col));
+                    
+                    if (missingColumns.length > 0) {
+                        alert(`Columnas faltantes: ${missingColumns.join(', ')}\n\nAsegúrate de que tu CSV tenga las columnas: user_id, follower_id, timestamp`);
+                        return;
+                    }
+
+                    // Mostrar información del archivo
+                    document.getElementById('fileColumns').textContent = headers.join(', ');
+                    
+                    // Crear vista previa
+                    createDataPreview(lines.slice(1, 6)); // Primeras 5 filas
+                    
+                    // Habilitar botón de subida
+                    document.getElementById('uploadBtn').disabled = false;
+                    
+                } catch (error) {
+                    alert('Error al leer el archivo CSV: ' + error.message);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function displayFileInfo(file) {
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = fileSize + ' MB';
+            document.getElementById('fileInfo').style.display = 'block';
+        }
+
+        function createDataPreview(lines) {
+            const previewDiv = document.getElementById('previewTable');
+            let html = '<table><thead><tr>';
+            
+            // Headers
+            const headers = ['user_id', 'follower_id', 'timestamp'];
+            headers.forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            // Datos de ejemplo
+            lines.forEach(line => {
+                if (line.trim()) {
+                    const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+                    html += '<tr>';
+                    values.slice(0, 3).forEach(value => {
+                        html += `<td>${value}</td>`;
+                    });
+                    html += '</tr>';
+                }
+            });
+            
+            html += '</tbody></table>';
+            previewDiv.innerHTML = html;
+            document.getElementById('dataPreview').style.display = 'block';
+        }
+
+        async function uploadDataset() {
+            if (!selectedFile) {
+                alert('Por favor selecciona un archivo primero.');
+                return;
+            }
+
+            const uploadBtn = document.getElementById('uploadBtn');
+            const originalText = uploadBtn.innerHTML;
+            uploadBtn.innerHTML = '📤 Subiendo...';
+            uploadBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                const response = await fetch('/api/upload-dataset', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Dataset subido exitosamente!\n\nEl archivo ha sido guardado y está listo para análisis.');
+                    
+                    // Actualizar el selector de dataset
+                    const datasetSelect = document.getElementById('dataset-select');
+                    const option = document.createElement('option');
+                    option.value = result.filename;
+                    option.textContent = `📁 ${selectedFile.name} (Personalizado)`;
+                    datasetSelect.appendChild(option);
+                    datasetSelect.value = result.filename;
+                    
+                    closeUploadModal();
+                } else {
+                    alert('❌ Error al subir el dataset: ' + result.message);
+                }
+            } catch (error) {
+                alert('❌ Error de conexión: ' + error.message);
+            } finally {
+                uploadBtn.innerHTML = originalText;
+                uploadBtn.disabled = false;
+            }
+        }
+
+        // Drag and drop functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('fileInput').files = files;
+                    processFile(files[0]);
+                }
+            });
+        });
+
+        // Cerrar modal al hacer clic fuera de él
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('uploadModal');
+            if (event.target === modal) {
+                closeUploadModal();
+            }
+        });
+
+        // ========================================
+        // FUNCIÓN DE CERRAR SESIÓN
+        // ========================================
+
+        async function logout() {
+            try {
+                // Mostrar confirmación
+                if (!confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                    return;
+                }
+
+                // Llamar al endpoint de logout
+                const response = await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token'))
+                    }
+                });
+
+                // Limpiar tokens de almacenamiento
+                localStorage.removeItem('auth_token');
+                sessionStorage.removeItem('auth_token');
+
+                // Mostrar mensaje de éxito
+                alert('Sesión cerrada exitosamente. Redirigiendo al login...');
+
+                // Redirigir al login
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 1000);
+
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+                
+                // Limpiar tokens de todas formas
+                localStorage.removeItem('auth_token');
+                sessionStorage.removeItem('auth_token');
+                
+                alert('Sesión cerrada. Redirigiendo al login...');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 1000);
+            }
+        }
     </script>
 </body>
 </html>

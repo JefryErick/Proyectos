@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template_string, redirect, url_for
+from flask import Flask, jsonify, request, render_template_string, redirect, url_for, g
 from flask_cors import CORS
 import json
 import threading
@@ -11,7 +11,7 @@ import hashlib
 from datetime import datetime, timedelta
 from functools import wraps
 import os
-import numpy as pd
+import pandas as pd
 
 app = Flask(__name__)
 CORS(app)
@@ -74,8 +74,8 @@ def requiere_auth(f):
         if not payload:
             return jsonify({'success': False, 'message': 'Token inválido o expirado'}), 401
         
-        # Agregar información del usuario al request
-        request.current_user = payload
+        # Agregar información del usuario al contexto global
+        g.current_user = payload
         return f(*args, **kwargs)
     
     return decorated_function
@@ -138,7 +138,7 @@ def admin_dashboard():
 @requiere_auth
 def verify_admin():
     """Verificar si el usuario es administrador"""
-    user_info = request.current_user
+    user_info = g.current_user
     return jsonify({
         'success': True,
         'role': user_info['role'],
@@ -291,7 +291,7 @@ def profile():
     """Obtener información del usuario actual"""
     return jsonify({
         'success': True,
-        'user': request.current_user
+        'user': g.current_user
     })
 
 @app.route('/api/run-analysis', methods=['POST'])
@@ -315,7 +315,7 @@ def run_analysis():
         dataset_type = params.get('dataset_type', 'twitter')
         
         # Log de usuario que ejecuta análisis
-        user_info = request.current_user
+        user_info = g.current_user
         print(f"Usuario {user_info['username']} ({user_info['role']}) ejecutando análisis")
         
         # Iniciar análisis en hilo separado
@@ -415,7 +415,7 @@ def upload_dataset():
         if file.filename == '':
             return jsonify({'success': False, 'message': 'Nombre de archivo vacío'}), 400
         
-        if not file.filename.endswith('.csv'):
+        if not file or not file.filename or not file.filename.endswith('.csv'):
             return jsonify({'success': False, 'message': 'Solo se aceptan archivos CSV'}), 400
         
         # Crear directorio data si no existe
@@ -489,6 +489,16 @@ def execute_analysis(time_window, bootstrap_samples, cv_folds, dataset_type):
         elif dataset_type == "memetracker":
             df = analyzer.cargar_datos_memetracker()
         elif dataset_type.startswith("data/personalizado_"):  # Dataset personalizado
+            # Verificar que el archivo existe con más detalle
+            full_path = os.path.abspath(dataset_type)
+            print(f"🔍 Intentando cargar dataset personalizado: {full_path}")
+            print(f"📁 Contenido del directorio data/: {os.listdir('data')}")
+            
+            if not os.path.exists(dataset_type):
+                raise ValueError(f"El archivo {dataset_type} no existe. Ruta absoluta: {full_path}")
+            
+            print(f"✅ Archivo encontrado. Tamaño: {os.path.getsize(dataset_type)} bytes")
+            
             df = analyzer.cargar_datos_personalizado(dataset_type, {
                 'user_id': 'user_id',
                 'follower_id': 'follower_id',
@@ -509,7 +519,16 @@ def execute_analysis(time_window, bootstrap_samples, cv_folds, dataset_type):
         nodos_disponibles = list(analyzer.grafo.nodes())
         
         # Seleccionar nodos con mayor grado como semillas
-        grados = [(nodo, analyzer.grafo.degree(nodo)) for nodo in nodos_disponibles]
+        grados = []
+        for nodo in nodos_disponibles:
+            try:
+                grado = analyzer.grafo.degree(nodo)
+                if isinstance(grado, (int, float)):
+                    grados.append((nodo, int(grado)))
+                else:
+                    grados.append((nodo, 0))
+            except:
+                grados.append((nodo, 0))
         grados.sort(key=lambda x: x[1], reverse=True)
         
         # Usar top nodos o mínimo 15
