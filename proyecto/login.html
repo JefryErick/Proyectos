@@ -531,13 +531,6 @@
             </div>
         </form>
 
-        <div class="demo-credentials" id="demoCredentials">
-            <h4>🔧 Credenciales de Demo:</h4>
-            <p><strong>Usuario:</strong> admin</p>
-            <p><strong>Contraseña:</strong> admin123</p>
-            <p><strong>Usuario:</strong> analyst</p>
-            <p><strong>Contraseña:</strong> analyst123</p>
-        </div>
     </div>
     </div>
 
@@ -656,7 +649,7 @@
                 }
             }
 
-            handleRegister(username, password, confirmPassword, email) {
+            async handleRegister(username, password, confirmPassword, email) {
                 if (password !== confirmPassword) {
                     this.showAlert('Las contraseñas no coinciden', 'danger');
                     return;
@@ -667,32 +660,29 @@
                     return;
                 }
 
-                if (this.users.find(user => user.username === username)) {
-                    this.showAlert('El usuario ya existe', 'danger');
-                    return;
-                }
-
                 this.setLoading(true, 'Registrando usuario...');
                 this.clearAlerts();
 
-                setTimeout(() => {
-                    const newUser = {
-                        username,
-                        password,
-                        email: email || '',
-                        role: 'user',
-                        createdAt: new Date().toISOString()
-                    };
-
-                    this.users.push(newUser);
-                    this.saveUsers(this.users);
-
-                    this.showAlert('¡Usuario registrado exitosamente! Ahora puedes iniciar sesión.', 'success');
-                    this.currentMode = 'login';
-                    this.updateModeUI();
-                    this.form.reset();
+                try {
+                    const response = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password, email })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        this.showAlert('¡Usuario registrado exitosamente! Ahora puedes iniciar sesión.', 'success');
+                        this.currentMode = 'login';
+                        this.updateModeUI();
+                        this.form.reset();
+                    } else {
+                        this.showAlert(result.message || 'Error en el registro', 'danger');
+                    }
+                } catch (error) {
+                    this.showAlert('Error de conexión. Intente nuevamente.', 'danger');
+                } finally {
                     this.setLoading(false);
-                }, 1000);
+                }
             }
 
             async handleLogin(username, password, remember) {

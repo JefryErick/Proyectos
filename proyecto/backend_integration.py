@@ -21,18 +21,40 @@ app.config['SECRET_KEY'] = 'tu_clave_secreta_aqui_cambiar_en_produccion'
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(hours=24)
 
 # Usuarios del sistema (en producción usar base de datos)
-USUARIOS = {
-    'admin': {
-        'password': hashlib.sha256('admin123'.encode()).hexdigest(),
-        'role': 'admin',
-        'name': 'Administrador'
-    },
-    'analyst': {
-        'password': hashlib.sha256('analyst123'.encode()).hexdigest(),
-        'role': 'analyst',
-        'name': 'Analista'
-    }
-}
+USUARIOS_FILE = os.path.join('data', 'usuarios.json')
+
+def cargar_usuarios():
+    """Carga los usuarios desde el archivo JSON o crea los demo si no existe"""
+    if not os.path.exists(USUARIOS_FILE):
+        usuarios_demo = {
+            'admin': {
+                'password': hashlib.sha256('admin123'.encode()).hexdigest(),
+                'role': 'admin',
+                'name': 'Administrador',
+                'email': 'admin@demo.com',
+                'createdAt': datetime.utcnow().isoformat()
+            },
+            'analyst': {
+                'password': hashlib.sha256('analyst123'.encode()).hexdigest(),
+                'role': 'analyst',
+                'name': 'Analista',
+                'email': 'analyst@demo.com',
+                'createdAt': datetime.utcnow().isoformat()
+            }
+        }
+        with open(USUARIOS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(usuarios_demo, f, indent=2)
+        return usuarios_demo
+    else:
+        with open(USUARIOS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+
+def guardar_usuarios(usuarios):
+    with open(USUARIOS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(usuarios, f, indent=2)
+
+# Cargar usuarios al iniciar
+USUARIOS = cargar_usuarios()
 
 # Variable global para el analizador
 analyzer = None
@@ -745,6 +767,76 @@ def create_dashboard_interface():
     except Exception as e:
         print(f"\n❌ Error en el servidor: {e}")
 
+@app.route('/api/register', methods=['POST'])
+def register():
+    """Endpoint para registrar un nuevo usuario (solo rol user)"""
+    try:
+        datos = request.get_json()
+        username = datos.get('username')
+        password = datos.get('password')
+        email = datos.get('email', '')
+        # Solo permitimos registro de usuarios normales (no admin)
+        role = 'user'
+        name = datos.get('name', username)
+
+        if not username or not password:
+            return jsonify({'success': False, 'message': 'Usuario y contraseña requeridos'}), 400
+        if len(password) < 6:
+            return jsonify({'success': False, 'message': 'La contraseña debe tener al menos 6 caracteres'}), 400
+        if username in USUARIOS:
+            return jsonify({'success': False, 'message': 'El usuario ya existe'}), 400
+
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        nuevo_usuario = {
+            'password': password_hash,
+            'role': role,
+            'name': name,
+            'email': email,
+            'createdAt': datetime.utcnow().isoformat()
+        }
+        USUARIOS[username] = nuevo_usuario
+        guardar_usuarios(USUARIOS)
+        return jsonify({'success': True, 'message': 'Usuario registrado exitosamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error en registro: {str(e)}'}), 500
+
+@app.route('/api/users-stats')
+@requiere_auth
+def users_stats():
+    """Devuelve estadísticas y lista de usuarios (solo admin)"""
+    user_info = g.current_user
+    if user_info['role'] != 'admin':
+        return jsonify({'success': False, 'message': 'Solo el admin puede ver estadísticas de usuarios'}), 403
+
+    usuarios = cargar_usuarios()
+    now = datetime.utcnow()
+    nuevos_7dias = 0
+    usuarios_list = []
+    roles_count = {}
+    for username, u in usuarios.items():
+        created_at = u.get('createdAt')
+        try:
+            fecha = datetime.fromisoformat(created_at) if created_at else None
+        except Exception:
+            fecha = None
+        if fecha and (now - fecha).days < 7:
+            nuevos_7dias += 1
+        rol = u.get('role', 'user')
+        roles_count[rol] = roles_count.get(rol, 0) + 1
+        usuarios_list.append({
+            'username': username,
+            'role': rol,
+            'email': u.get('email', ''),
+            'createdAt': created_at,
+            'name': u.get('name', username)
+        })
+    return jsonify({
+        'success': True,
+        'total_users': len(usuarios),
+        'new_users_7days': nuevos_7dias,
+        'roles_count': roles_count,
+        'users': usuarios_list
+    })
 
 if __name__ == "__main__":
     create_dashboard_interface()

@@ -1,0 +1,12 @@
+# Agrega aquí las dependencias de Python detectadas en el proyecto. Si usas pandas, numpy, flask, etc., inclúyelos aquí.
+# Ejemplo:
+flask
+flask-cors
+pandas
+numpy
+networkx
+matplotlib
+seaborn
+requests
+tweepy
+pyjwt 
